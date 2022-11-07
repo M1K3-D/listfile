@@ -1,126 +1,192 @@
 import os
 import unidecode
 import tkinter as tk
+from tkinter import ttk
 from tkinter.filedialog import askdirectory
 from pathlib import Path
 from functools import partial
+from tabulate import tabulate
 
 win = tk.Tk()
 win.title("Suppression caracteres accentues".upper())
-win.geometry("800x800")
+win.geometry("1000x1000")
 Lsize = 0
 cpt_lu = 0
 cpt_tr = 0
+# Universal Home
 home_folder = os.path.expanduser('~')
 homedrive = home_folder
 rep_source = home_folder
-selection=""
+selection = ""
 r_record = []
-
-# Selection fichier
-def openfile(evt): 
-#    pass
+p_record = []
+# Selection fichier et affichage nom dans la3
+def openfile(evt):
+    #    pass
     w = evt.widget
-    index = int(w.curselection()[0])
-    value = w.get(index)
-#    print('You selected item %d: "%s"' % (index, value))
+# Pour ListBox    
+#    index = int(w.curselection()[0])
+#    value = w.get(index)
+# Pour TreeView
+    index = w.selection()[0]
+    value = tr.set(index, column="c1")
     selection = value
     v_sel.set(selection)
 
+# curItem = self.tree.item(self.tree.focus())
+#     col = self.tree.identify_column(event.x)
+#     print ('curItem = ', curItem)
+#     print ('col = ', col)
+
+#     if col == '#0':
+#         cell_value = curItem['text']
+#     elif col == '#1':
+#         cell_value = curItem['values'][0]
+#     elif col == '#2':
+#         cell_value = curItem['values'][1]
+#     elif col == '#3':
+#         cell_value = curItem['values'][2]
+#     print ('cell_value = ', cell_value)
+
 def ask_question(rep_source):
-#    global rep_source
-    lb.delete(0, tk.END)
-    win.update()
+    #    global rep_source
+    global cpt_lu
+    global cpt_tr    
     rep_source = tk.filedialog.askdirectory(
-    parent=win, initialdir=homedrive, title="Selectionnez le dossier SOURCE")
+        parent=win, initialdir=homedrive, title="Selectionnez le dossier SOURCE")
     try:
         os.listdir(rep_source)
     except Exception as e:
         tk.messagebox.showinfo('Return', 'Traitement annulé', parent=win)
+    v_trait = 'N'
+
     read_files(rep_source)
-    
+#    if Lsize != 0:
+    v_cpt.set(str(cpt_lu)+"/"+str(cpt_tr))
+    win.update()
+    if cpt_tr != 0:
+        do_job(rep_source)
+
 def read_files(rep_source):
-#    global rep_source
-    r_record.clear()
+    #    global rep_source
+    global cpt_lu
+    global cpt_tr
+    lb.delete(0, tk.END)
+    tr.delete(*tr.get_children())
+    win.update()
     cpt_lu = 0
     cpt_tr = 0
+    r_record.clear()
 
     for file in os.listdir(rep_source):
         fileDec = unidecode.unidecode(file)
-        cpt_lu = cpt_lu+1
+        cpt_lu = cpt_lu + 1
         v_cpt.set(str(cpt_lu)+"/"+str(cpt_tr))
-#        la1.config(text=str(cpt_lu)+"/"+str(cpt_tr))
+#       la1.config(text=str(cpt_lu)+"/"+str(cpt_tr))
 
         filePath = Path(rep_source)
         newFile = filePath / fileDec
         oldFile = filePath / file
-        if os.path.isfile(oldFile) is True : 
+        if os.path.isfile(oldFile) is True:
             v_type = 'F'
-        if os.path.isdir(oldFile) is True :
+        if os.path.isdir(oldFile) is True:
             v_type = 'D'
-        if os.path.isfile(newFile) is True : 
+        if os.path.isfile(newFile) is True:
             v_exist = 'Y'
-        if os.path.isdir(newFile) is True :
-            v_exist = 'Y'    
-        r_record.append([file,fileDec,oldFile,newFile,v_type,v_exist])
-        
-    for [file,fileDec,oldFile,newFile,v_type,v_exist] in r_record :  
-        # print(file, oldFile)    
-        lb.insert(0, "  " + file + "  "+"\t" + v_type+"\t" + v_exist)
-        if file != fileDec:
-            lb.insert(1, "  "+"\t" + fileDec + "  "+"\t" + v_type+"\t" + v_exist)  
-        
+        if os.path.isdir(newFile) is True:
+            v_exist = 'Y'
+        v_trait = "N"
+
+        if file == fileDec:
+            v_trait = 'N'
+            # lb.insert(0, "  " + file + "  "+"\t" + v_type+"\t" + v_exist)
+            #tr.insert('', 'end', text="1", values=(file,"" ,v_type, v_exist,v_trait))
+            fileDec=""
+        else:
+            # Si le repertoire existe, on traite 
+            if (v_type == "D" and v_exist == "Y"):
+                v_trait = 'N'
+            # Si le fichier existe, on traite 
+            elif (v_type == "F" and v_exist == "Y"):
+                v_trait = 'Y'
+                    # lb.insert(1, "  "+"\t" + fileDec + "  " +
+                    #   "\t" + v_type+"\t" + v_exist)
+            else:
+                v_trait = 'Y'
+        r_record.append([file, fileDec, oldFile, newFile, v_type, v_exist, v_trait])
+
+    for [file, fileDec, oldFile, newFile, v_type, v_exist,v_trait] in r_record:
+        if v_trait == 'Y':
+            cpt_tr = cpt_tr+1
+        tr.insert('', 'end', text="1", values=(file,fileDec ,v_type, v_exist,v_trait))
+
     win.update()
+#   nb d'enreg dans la lb
     Lsize = lb.size()
-    if Lsize != 0:
-        do_job(rep_source)
 
 def do_job(rep_source):
     msg_box = tk.messagebox.askquestion('Return', 'Validation des modifications ?',
                                         icon='warning', parent=win)
     if msg_box == 'yes':
-#       pass
+        #       pass
         rename_files(rep_source)
         tk.messagebox.showinfo('Return', 'Traitement terminé', parent=win)
     else:
         tk.messagebox.showinfo(
             'Return', 'Modifications non effectuées', parent=win)
 
-def rename_files(rep_source):
-#    global rep_source
-    cpt_lu = 0
-    cpt_tr = 0    
 
-    for [file,fileDec,oldFile,newFile,v_type,v_exist] in r_record :  
-        # print(file, oldFile)    
+def rename_files(rep_source):
+    global cpt_lu
+    global cpt_tr
+    cpt_lu = 0
+    cpt_tr = 0
+    for [file, fileDec, oldFile, newFile, v_type, v_exist, v_trait] in r_record:
+        # print(file, oldFile)
         cpt_lu = cpt_lu+1
-        if newFile != oldFile:
+        if v_trait == 'Y':
             pass
             # filePath = Path(rep_source)
             # newFile = filePath / fileDec
             # oldFile = filePath / file
-            if not ( v_type == "D" and v_exist == "Y" ) :
-                try:
-                    os.rename(oldFile, newFile)  
-                    cpt_tr = cpt_tr+1
-                except Exception as e:
-                    print(str(e))
-                    tk.messagebox.showinfo('Return', str(e), parent=win)
-
+            try:
+                os.replace(oldFile, newFile)
+                cpt_tr = cpt_tr+1
+            except Exception as e:
+                print(str(e))
+                tk.messagebox.showinfo('Return', str(e), parent=win)
+#   refresh
+    read_files(rep_source)
     v_cpt.set(str(cpt_lu)+"/"+str(cpt_tr))
 #   la1.config(text=str(cpt_lu)+"/"+str(cpt_tr))
+
 
 v_cpt = tk.StringVar(win, value=str(cpt_lu)+"/"+str(cpt_tr))
 v_sel = tk.StringVar(win, value=selection)
 action_with_arg = partial(ask_question, rep_source)
-bt1 = tk.Button(win, text="Open a File", command= action_with_arg)
+bt1 = tk.Button(win, text="Open a File", command=action_with_arg)
 bt1.pack()
 lb = tk.Listbox(win)
-lb.pack(expand=tk.YES, fill=tk.BOTH)
-lb.bind("<<ListboxSelect>>",openfile)
+lb.pack()
+# expand=tk.YES, fill=tk.BOTH)
+lb.bind("<<ListboxSelect>>", openfile)
+tr = ttk.Treeview(win, column=("c1", "c2", "c3","c4","c5"), show='headings', height=20)
+tr.heading('c1', text='Fichier')
+tr.column('c1', minwidth=0, width=300)
+tr.heading('c2', text='Nouveau Fichier')
+tr.column('c2', minwidth=0, width=300)
+tr.heading('c3', text='F/D')
+tr.column('c3', minwidth=0, width=50)
+tr.heading('c4', text='Exist')
+tr.column('c4', minwidth=0, width=50)
+tr.heading('c5', text='Traitement')
+tr.column('c5', minwidth=0, width=50)
+tr.pack(expand=tk.YES, fill=tk.BOTH)
+tr.bind("<<TreeviewSelect>>", openfile)
+
 # Utilisation de variable
 #la1 = tk.Label(win,text=str(cpt_lu)+"/"+str(cpt_tr))
-#la1.pack()
+# la1.pack()
 # Utilisation de tk.StringVar
 la2 = tk.Label(win, textvariable=v_cpt)
 la2.pack()
