@@ -53,27 +53,27 @@ def openfile(evt):
 #         cell_value = curItem['values'][2]
 #     print ('cell_value = ', cell_value)
 
-def ask_question(rep_source):
-    #    global rep_source
+def ask_question():
+    global rep_source
     global cpt_lu
     global cpt_tr    
     rep_source = tk.filedialog.askdirectory(
-        parent=win, initialdir=homedrive, title="Selectionnez le dossier SOURCE")
+        parent=win, initialdir=rep_source, title="Selectionnez le dossier SOURCE")
     try:
         os.listdir(rep_source)
     except Exception as e:
         tk.messagebox.showinfo('Return', 'Traitement annulé', parent=win)
     v_trait = 'N'
 
-    read_files(rep_source)
+    read_files()
 #    if Lsize != 0:
     v_cpt.set(str(cpt_lu)+"/"+str(cpt_tr))
     win.update()
     if cpt_tr != 0:
-        do_job(rep_source)
+        do_job()
 
-def read_files(rep_source):
-    #    global rep_source
+def read_files():
+    global rep_source
     global cpt_lu
     global cpt_tr
     lb.delete(0, tk.END)
@@ -97,22 +97,22 @@ def read_files(rep_source):
             v_type = 'F'
         if os.path.isdir(oldFile) is True:
             v_type = 'D'
-#        if os.path.exists(newFile) is True:
+        v_exist = 'N'
+        if os.path.isfile(newFile) is True:
             v_exist = 'Y'
-#        if os.path.exists(newFile) is True:
-        v_exist = 'Y'
+        if os.path.isdir(newFile) is True:
+            v_exist = 'Y'
 #        os.stat(newFile)    
 #        v_trait = "N"
 
         if file == fileDec:
             v_trait = 'N'
-            # lb.insert(0, "  " + file + "  "+"\t" + v_type+"\t" + v_exist)
-            #tr.insert('', 'end', text="1", values=(file,"" ,v_type, v_exist,v_trait))
+            v_exist = ''
             fileDec=""
         else:
-            # Si le repertoire existe, on traite 
+            # Si le repertoire existe, on traite ?
             if (v_type == "D" and v_exist == "Y"):
-                v_trait = 'Y'
+                    v_trait = '?'
             # Si le fichier existe, on traite 
             elif (v_type == "F" and v_exist == "Y"):
                 v_trait = 'Y'
@@ -131,18 +131,20 @@ def read_files(rep_source):
 #   nb d'enreg dans la lb
     Lsize = lb.size()
 
-def do_job(rep_source):
+def do_job():
+    global rep_source
     msg_box = tk.messagebox.askquestion('Return', 'Validation des modifications ?',
                                         icon='warning', parent=win)
     if msg_box == 'yes':
         #       pass
-        rename_files(rep_source)
+        rename_files()
         tk.messagebox.showinfo('Return', 'Traitement terminé', parent=win)
     else:
         tk.messagebox.showinfo(
             'Return', 'Modifications non effectuées', parent=win)
 
-def rename_files(rep_source):
+def rename_files():
+    global rep_source
     global cpt_lu
     global cpt_tr
     cpt_lu = 0
@@ -163,15 +165,17 @@ def rename_files(rep_source):
                 print(str(e))
                 tk.messagebox.showinfo('Return', str(e), parent=win)
 #   refresh
-    read_files(rep_source)
+    read_files()
     v_cpt.set(str(cpt_lu)+"/"+str(cpt_tr))
 #   la1.config(text=str(cpt_lu)+"/"+str(cpt_tr))
 
 
 v_cpt = tk.StringVar(win, value=str(cpt_lu)+"/"+str(cpt_tr))
 v_sel = tk.StringVar(win, value=selection)
-action_with_arg = partial(ask_question, rep_source)
-bt1 = tk.Button(win, text="Open a Directory", command=action_with_arg)
+
+# action_with_arg = partial(ask_question, rep_source)
+# bt1 = tk.Button(win, text="Open a Directory", command=action_with_arg)
+bt1 = tk.Button(win, text="Open a Directory", command = ask_question)
 bt1.pack()
 lb = tk.Listbox(win)
 lb.pack()
