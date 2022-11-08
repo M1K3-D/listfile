@@ -1,11 +1,14 @@
 import os
+import sys
 import unidecode
+import shutil
 import tkinter as tk
 from tkinter import ttk
 from tkinter.filedialog import askdirectory
 from pathlib import Path
 from functools import partial
-from tabulate import tabulate
+
+#from tabulate import tabulate
 
 win = tk.Tk()
 win.title("Suppression caracteres accentues".upper())
@@ -19,8 +22,10 @@ homedrive = home_folder
 rep_source = home_folder
 selection = ""
 r_record = []
-p_record = []
+#p_record = []
 # Selection fichier et affichage nom dans la3
+
+print (sys.getfilesystemencoding())
 def openfile(evt):
     #    pass
     w = evt.widget
@@ -79,23 +84,25 @@ def read_files(rep_source):
     r_record.clear()
 
     for file in os.listdir(rep_source):
+        fileDec = file
         fileDec = unidecode.unidecode(file)
         cpt_lu = cpt_lu + 1
         v_cpt.set(str(cpt_lu)+"/"+str(cpt_tr))
 #       la1.config(text=str(cpt_lu)+"/"+str(cpt_tr))
 
         filePath = Path(rep_source)
-        newFile = filePath / fileDec
-        oldFile = filePath / file
+        newFile = os.path.join(filePath , fileDec)
+        oldFile = os.path.join(filePath , file)
         if os.path.isfile(oldFile) is True:
             v_type = 'F'
         if os.path.isdir(oldFile) is True:
             v_type = 'D'
-        if os.path.isfile(newFile) is True:
+#        if os.path.exists(newFile) is True:
             v_exist = 'Y'
-        if os.path.isdir(newFile) is True:
-            v_exist = 'Y'
-        v_trait = "N"
+#        if os.path.exists(newFile) is True:
+        v_exist = 'Y'
+#        os.stat(newFile)    
+#        v_trait = "N"
 
         if file == fileDec:
             v_trait = 'N'
@@ -105,7 +112,7 @@ def read_files(rep_source):
         else:
             # Si le repertoire existe, on traite 
             if (v_type == "D" and v_exist == "Y"):
-                v_trait = 'N'
+                v_trait = 'Y'
             # Si le fichier existe, on traite 
             elif (v_type == "F" and v_exist == "Y"):
                 v_trait = 'Y'
@@ -135,7 +142,6 @@ def do_job(rep_source):
         tk.messagebox.showinfo(
             'Return', 'Modifications non effectuées', parent=win)
 
-
 def rename_files(rep_source):
     global cpt_lu
     global cpt_tr
@@ -151,6 +157,7 @@ def rename_files(rep_source):
             # oldFile = filePath / file
             try:
                 os.replace(oldFile, newFile)
+#                shutil.move(oldFile, newFile)
                 cpt_tr = cpt_tr+1
             except Exception as e:
                 print(str(e))
@@ -164,7 +171,7 @@ def rename_files(rep_source):
 v_cpt = tk.StringVar(win, value=str(cpt_lu)+"/"+str(cpt_tr))
 v_sel = tk.StringVar(win, value=selection)
 action_with_arg = partial(ask_question, rep_source)
-bt1 = tk.Button(win, text="Open a File", command=action_with_arg)
+bt1 = tk.Button(win, text="Open a Directory", command=action_with_arg)
 bt1.pack()
 lb = tk.Listbox(win)
 lb.pack()
