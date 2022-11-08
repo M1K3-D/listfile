@@ -123,7 +123,7 @@ def read_files():
         r_record.append([file, fileDec, oldFile, newFile, v_type, v_exist, v_trait])
 
     for [file, fileDec, oldFile, newFile, v_type, v_exist,v_trait] in r_record:
-        if v_trait == 'Y':
+        if (v_trait == 'Y' or v_trait == '?'):
             cpt_tr = cpt_tr+1
         tr.insert('', 'end', text="1", values=(file,fileDec ,v_type, v_exist,v_trait))
 
@@ -152,7 +152,7 @@ def rename_files():
     for [file, fileDec, oldFile, newFile, v_type, v_exist, v_trait] in r_record:
         # print(file, oldFile)
         cpt_lu = cpt_lu+1
-        if v_trait == 'Y':
+        if (v_trait == 'Y'):
             pass
             # filePath = Path(rep_source)
             # newFile = filePath / fileDec
@@ -162,8 +162,21 @@ def rename_files():
 #                shutil.move(oldFile, newFile)
                 cpt_tr = cpt_tr+1
             except Exception as e:
-                print(str(e))
+                cpt_tr = cpt_tr-1
+#                print(str(e))
                 tk.messagebox.showinfo('Return', str(e), parent=win)
+        if v_trait == '?':
+            try:
+#                os.copy(oldFile, newFile)
+#                newFile = newFile+"zz" 
+#                shutil.copy2(oldFile, newFile)
+                shutil.copytree(oldFile, newFile, dirs_exist_ok=True)
+                cpt_tr = cpt_tr+1
+            except Exception as e:
+                cpt_tr = cpt_tr-1
+#                print(str(e))
+                tk.messagebox.showinfo('Return', str(e), parent=win)
+
 #   refresh
     read_files()
     v_cpt.set(str(cpt_lu)+"/"+str(cpt_tr))
