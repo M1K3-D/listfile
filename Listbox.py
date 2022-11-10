@@ -57,7 +57,9 @@ def ask_question():
     global rep_source
     global cpt_lu
     global cpt_tr    
-    rep_source = tk.filedialog.askdirectory(
+#    rep_source = tk.filedialog.askdirectory(
+#        parent=win, initialdir=rep_source, title="Selectionnez le dossier SOURCE")
+    rep_source = tk.filedialog.askopenfilenames(
         parent=win, initialdir=rep_source, title="Selectionnez le dossier SOURCE")
     try:
         os.listdir(rep_source)
