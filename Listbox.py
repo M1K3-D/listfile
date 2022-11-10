@@ -25,7 +25,7 @@ r_record = []
 #p_record = []
 # Selection fichier et affichage nom dans la3
 
-print (sys.getfilesystemencoding())
+# print (sys.getfilesystemencoding())
 def openfile(evt):
     #    pass
     w = evt.widget
@@ -57,20 +57,22 @@ def ask_question():
     global rep_source
     global cpt_lu
     global cpt_tr    
+    v_go = True
     rep_source = tk.filedialog.askdirectory(
         parent=win, initialdir=rep_source, title="Selectionnez le dossier SOURCE")
     try:
         os.listdir(rep_source)
     except Exception as e:
         tk.messagebox.showinfo('Return', 'Traitement annulé', parent=win)
-    v_trait = 'N'
+        v_go = False
+    if v_go == True:
+        v_trait = 'N'
 
-    read_files()
-#    if Lsize != 0:
-    v_cpt.set(str(cpt_lu)+"/"+str(cpt_tr))
-    win.update()
-    if cpt_tr != 0:
-        do_job()
+        read_files()
+        v_cpt.set(str(cpt_lu)+"/"+str(cpt_tr))
+        win.update()
+        if cpt_tr != 0:
+            do_job()
 
 def read_files():
     global rep_source
