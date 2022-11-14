@@ -2,11 +2,13 @@ import os
 import shutil
 import tkinter as tk
 from tkinter import filedialog
-#from tkinter.filedialog import askdirectory
+
+from tkinter.filedialog import askdirectory
 import unidecode
+
 #import tkinter
 #from tkinter import filedialog as fd
-#import tkinter.filedialog
+import tkinter.filedialog
 
 root = tk.Tk()
 root.title("SUPPRESSION ACCENTS RECURSIF")
@@ -27,12 +29,20 @@ for path, dirs, files in os.walk(current_directory):
         newdir = unidecode.unidecode(dir)
         newdirname = os.path.join(path, newdir)
         lb.insert('end', dirname)
+        lb.pack()
+        root.update()
         if dirname != newdirname:
             if not os.path.exists(newdirname):
-                lb.insert('end', '->' + newdirname)
+                lb.insert('end', 'copy and delete ->' + newdirname)
+                lb.pack()
+                root.update()
 #               print(dirname)
 #               print('-', newdirname)
                 shutil.copytree(dirname, newdirname, dirs_exist_ok=True)
+                shutil.rmtree(dirname, ignore_errors=True)
+            else:
+                lb.insert('end', 'delete ->' + newdirname)
+                shutil.rmtree(dirname, ignore_errors=True)
 
 for path, dirs, files in os.walk(current_directory):
     for file in files:
@@ -40,9 +50,15 @@ for path, dirs, files in os.walk(current_directory):
         newfile = unidecode.unidecode(file)
         newfilename = os.path.join(path, newfile)
         lb.insert('end', filename)
+        root.update()
+        lb.pack()
         if filename != newfilename:
-            lb.insert('end', '->' + newfilename)
+            lb.insert('end', 'rename->' + newfilename)
+            lb.pack()
+            root.update()
 #           print(filename)
 #           print('-', newfilename)
             os.replace(filename, newfilename)
+lb.insert('end', 'TERMINE')
+
 root.mainloop()
