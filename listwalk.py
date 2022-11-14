@@ -44,6 +44,12 @@ for path, dirs, files in os.walk(current_directory):
                 lb.insert('end', 'delete ->' + newdirname)
                 shutil.rmtree(dirname, ignore_errors=True)
 
+
+
+
+
+
+
 for path, dirs, files in os.walk(current_directory):
     for file in files:
         filename = os.path.join(path, file)
@@ -58,7 +64,11 @@ for path, dirs, files in os.walk(current_directory):
             root.update()
 #           print(filename)
 #           print('-', newfilename)
-            os.replace(filename, newfilename)
+            try:
+                os.replace(filename, newfilename)
+            except Exception as e:
+                lb.insert('end', str(e))
+                
 lb.insert('end', 'TERMINE')
 
 root.mainloop()
