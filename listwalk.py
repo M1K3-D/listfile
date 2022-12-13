@@ -70,5 +70,5 @@ for path, dirs, files in os.walk(current_directory):
                 lb.insert('end', str(e))
                 
 lb.insert('end', 'TERMINE')
-
+print ('TERMINE')
 root.mainloop()
