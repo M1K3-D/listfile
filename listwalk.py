@@ -51,23 +51,24 @@ for path, dirs, files in os.walk(current_directory):
 
 
 for path, dirs, files in os.walk(current_directory):
-    for file in files:
-        filename = os.path.join(path, file)
-        newfile = unidecode.unidecode(file)
-        newfilename = os.path.join(path, newfile)
-        lb.insert('end', filename)
-        root.update()
-        lb.pack()
-        if filename != newfilename:
-            lb.insert('end', 'rename->' + newfilename)
-            lb.pack()
+#    for dir in dirs:
+        for file in files:
+            filename = os.path.join(path, file)
+            newfile = unidecode.unidecode(file)
+            newfilename = os.path.join(path, newfile)
+            lb.insert('end', filename)
             root.update()
-#           print(filename)
-#           print('-', newfilename)
-            try:
-                os.replace(filename, newfilename)
-            except Exception as e:
-                lb.insert('end', str(e))
+            lb.pack()
+            if filename != newfilename:
+                lb.insert('end', 'rename->' + newfilename)
+                lb.pack()
+                root.update()
+#               print(filename)
+#               print('-', newfilename)
+                try:
+                    os.replace(filename, newfilename)
+                except Exception as e:
+                    lb.insert('end', str(e))
                 
 lb.insert('end', 'TERMINE')
 print ('TERMINE')
